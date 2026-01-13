@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Phát hiện quấy rối tình dục online</title>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
+
+<style>
+body { font-family: Arial; max-width: 800px; margin: auto; padding: 20px; }
+textarea, input { width: 100%; padding: 10px; margin-top: 5px; }
+button { padding: 10px; background: #d9534f; color: white; border: none; }
+#result { font-size: 18px; font-weight: bold; margin-top: 15px; }
+</style>
+</head>
+
+<body>
+
+<h2>Ứng dụng phát hiện quấy rối tình dục online</h2>
+
+<p>Số điện thoại phụ huynh / người giám hộ</p>
+<input id="phone" placeholder="VD: 09xxxxxxxx">
+
+<p>Phân tích tin nhắn</p>
+<textarea id="text" rows="4"></textarea>
+<button onclick="analyzeText()">Phân tích</button>
+
+<p>Phân tích ảnh chat</p>
+<input type="file" id="image">
+<button onclick="analyzeImage()">Phân tích ảnh</button>
+
+<p id="result"></p>
+
+<script>
+function normalize(t){
+ return t.toLowerCase().normalize("NFD")
+ .replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d");
+}
+
+const keywords = [
+"noi chuyen rieng","inbox anh","chi hai nguoi biet","dung noi voi ai",
+"giu bi mat","tin anh","khong ai biet","o nha mot minh","bo me dau",
+"co ai ben canh","noi chuyen khuya","anh thuong em","anh hieu em",
+"anh quan tam","em co don","tam su rieng","anh che cho","dung ngai",
+
+"em mac gi","body em","sexy","dang dep","nhin cuon","nong","khoe than",
+"mo ao","coi do","xem than hinh","xem nguc","xem mong","anh nhay cam",
+"anh nong","anh nude","chup guong","khong mac do","goi cam","body dinh",
+
+"gui anh nude","gui anh khoa than","gui anh vung kin","anh khoa than",
+"coi het","xem nude","xem vung kin","lam chuyen nguoi lon",
+"ngu voi anh","quan he","thu mot lan","anh them","anh muon em",
+
+"khong gui anh tung","anh co anh cua em","anh se dang","biet nha em",
+"biet truong em","em phai lam theo","ep em","khong duoc tu choi",
+"theo doi","co bang chung","em se hoi han"
+];
+
+function notify(content){
+ const p=document.getElementById("phone").value;
+ if(!p){ alert("Chưa nhập số phụ huynh"); return; }
+ window.location.href="sms:"+p+"?body="+encodeURIComponent(
+ "CANH BAO QUAY ROI ONLINE:\n"+content);
+}
+
+function analyze(content){
+ const t=normalize(content);
+ for(let k of keywords){
+   if(t.includes(k)){ notify(content);
+     document.getElementById("result").innerText="🚨 PHÁT HIỆN QUẤY RỐI";
+     return;
+   }
+ }
+ document.getElementById("result").innerText="✅ Nội dung an toàn";
+}
+
+function analyzeText(){
+ analyze(document.getElementById("text").value);
+}
+
+function analyzeImage(){
+ const f=document.getElementById("image").files[0];
+ if(!f) return;
+ Tesseract.recognize(f,"vie+eng").then(r=>analyze(r.data.text));
+}
+</script>
+
+</body>
+</html>
